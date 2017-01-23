@@ -1,0 +1,53 @@
+{
+	"name": "livs",
+	"displayName": "Open in Visual Studio",
+	"description": "Open the current file in Visual Studio quickly.",
+	"version": "1.0.2",
+	"publisher": "abhiagr",
+     "galleryBanner": {
+        "color": "#d7c797",
+        "theme": "light"
+    },
+   "icon":"images/icon.gif",
+	"engines": {
+		"vscode": "^0.10.1"
+	},
+    "bugs": {
+        "email": "agrawal.abhishek@live.com"
+    },
+	"categories": [
+		"Other"
+	],
+    "homepage": "https://marketplace.visualstudio.com/items?itemName=abhiagr.livs",
+    "keywords": [
+      "Visual Studio",
+      "open file",
+      "Open in Visual Studio",
+      "Launch in Visual Studio",
+      "IDE",
+      "Do More"
+    ],
+    "activationEvents": [
+		"onCommand:extension.launchInVS"
+	],
+	"main": "./extension",
+	"contributes": {
+		"commands": [{
+			"command": "extension.launchInVS",
+			"title": "Open in VS"
+		},
+        {
+            "command": "extension.launchInVS",
+			"title": "Launch in VS"
+        }
+        ],
+        
+        "keybindings": {
+            "command": "extension.launchInVS",
+            "key": "Alt+Shift+V"
+        }
+	},
+	"devDependencies": {
+		"vscode": "0.10.x"
+	}
+}
