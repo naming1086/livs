@@ -2,7 +2,7 @@
 	"name": "livs",
 	"displayName": "Open in Visual Studio",
 	"description": "Open the current file in Visual Studio quickly.",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"publisher": "abhiagr",
      "galleryBanner": {
         "color": "#d7c797",
@@ -12,8 +12,9 @@
 	"engines": {
 		"vscode": "^0.10.1"
 	},
-    "bugs": {
-        "email": "agrawal.abhishek@live.com"
+   "bugs": {
+        "url": "https://github.com/agrabhi/livs/issues",
+        "email":"beginloop@gmail.com"
     },
 	"categories": [
 		"Other"
@@ -27,6 +28,10 @@
       "IDE",
       "Do More"
     ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/agrabhi/livs.git"
+    },
     "activationEvents": [
 		"onCommand:extension.launchInVS"
 	],
