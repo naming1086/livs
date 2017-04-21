@@ -27,6 +27,9 @@ function activate(context) {
 	// The commandId parameter must match the command field in package.json
 	var disposable = vscode.commands.registerCommand('extension.launchInVS', function () {
    
+        var vsPath2017E = 'C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\Common7\\IDE\\devenv.exe ';
+        var vsPath2017P = 'C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Professional\\Common7\\IDE\\devenv.exe ';
+        var vsPath2017C = 'C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\Common7\\IDE\\devenv.exe ';
         var vsPath2015 = 'C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\Common7\\IDE\\devenv.exe';
         var vsPath2013 = 'C:\\Program Files (x86)\\Microsoft Visual Studio 12.0\\Common7\\IDE\\devenv.exe';
         var vsPath2012 = 'C:\\Program Files (x86)\\Microsoft Visual Studio 11.0\\Common7\\IDE\\devenv.exe';
@@ -36,7 +39,19 @@ function activate(context) {
         
         var vsPath;
         
-        if (doesExist(vsPath2015))
+        if (doesExist(vsPath2017E))
+        {
+            vsPath = vsPath2017E;            
+        }
+        else if (doesExist(vsPath2017C))
+        {
+            vsPath = vsPath2017C;            
+        }
+        if (doesExist(vsPath2017P))
+        {
+            vsPath = vsPath2017P;            
+        }
+        else if (doesExist(vsPath2015))
         {
             vsPath = vsPath2015;            
         }

@@ -9,7 +9,7 @@ Open/Launch in Visual Studio
 >You can also use Alt+shift+V to open the file in Visual Studio. 
 
 ##Compatibility with different versions of visual Studio
-__The extension is tested for Visual Studio 2015, but it has been written to work for 2010, 2012 and 2013 versions also. Please mail me if it doesn't work for you.__  
+__The extension is tested for Visual Studio 2015, but it has been written to work for 2017, 2010, 2012 and 2013 versions also. Please mail me if it doesn't work for you.__  
 
 
 ##Feedback

@@ -2,7 +2,7 @@
 	"name": "livs",
 	"displayName": "Open in Visual Studio",
 	"description": "Open the current file in Visual Studio quickly.",
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"publisher": "abhiagr",
      "galleryBanner": {
         "color": "#d7c797",
