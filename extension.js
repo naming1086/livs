@@ -47,7 +47,7 @@ function activate(context) {
         {
             vsPath = vsPath2017C;            
         }
-        if (doesExist(vsPath2017P))
+        else if (doesExist(vsPath2017P))
         {
             vsPath = vsPath2017P;            
         }
