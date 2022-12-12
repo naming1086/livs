@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HSF可视化配置，这个标题其实是没用的</title>
+    <link rel="stylesheet" href="../../lib/element-ui-2.7.2/index.css">
+    <link rel="stylesheet" href="../../src/view/batch-replace.css">
+</head>
+
+<body>
+    <div id="app">
+        <div class="header">
+            <h2>Replace Rules</h2>
+        </div>
+        <el-card class="content">
+            <div slot="header" class="history-title">
+                <span>操作面板</span>
+                <span class="operator operate add" @click="add">+</span>
+            </div>
+            <div class="rules">
+                <div class="rules-item" v-for="(item, index) in replaceRule" @mouseover="item.showDel = true"
+                    @mouseout="item.showDel = false">
+                    <el-input size="mini" v-model="item.find" placeholder="Search"></el-input>
+                    <span class="seperate">→</span>
+                    <el-input size="mini" v-model="item.to" placeholder="Replace"></el-input>
+                    <span :class="{ 'hide': !item.showDel }" class="operate del" @click="del(index)">×</span>
+                </div>
+            </div>
+            <div v-if="replaceRule.length > 0">
+                <el-button size="mini" @click="match">Search</el-button>
+                <el-button size="mini" @click="replace" type="primary">Replace All</el-button>
+                <el-button size="mini" @click="reset">Reset</el-button>
+            </div>
+            <div v-else class="empty">
+                点击右上角 "+" 添加匹配规则
+            </div>
+        </el-card>
+        <el-card class="history">
+            <div slot="header" class="history-title">
+                <span>历史记录</span>
+                <el-button class="operator clear-his" type="text" @click=resetHistory>清空</el-button>
+            </div>
+            <div class="history-list">
+                <el-tag v-for="(item, index) in histroyRules" size="mini" class="history-item"
+                    @click="reuseHistory(item)" type="info">
+                    {{item.find}} → {{item.to}}</el-tag>
+            </div>
+        </el-card>
+    </div>
+</body>
+
+</html>
+<script src="../../lib/vue-2.5.17/vue.js"></script>
+<script src="../../lib/element-ui-2.7.2/index.js"></script>
+<script src="../../src/view/batch-replace.js"></script>

@@ -1,116 +1,111 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 var vscode = require('vscode');
+const util = require('./util');
 
-function doesExist(path) {
-    var fs = require('fs');
 
-    try {
-        fs.accessSync(path, fs.F_OK);
-        return true;
-    } catch (e) {
-        return false;
-    }
-}
 
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 function activate(context) {
+	/**
+	 * 执行回调函数
+	 * @param {*} panel
+	 * @param {*} message
+	 * @param {*} response
+	 */
+	function invokeCallback(panel, message, response) {
+		// 错误码在400-600之间的，默认弹出错误提示
+		if (typeof response == 'object' && response.code && response.code >= 400 && response.code < 600) {
+			util.showError(response.message || '发生未知错误！');
+		}
+		panel.webview.postMessage({
+			cmd: 'vscodeCallback',
+			cbid: message.cbid,
+			data: response
+		});
+	}
+
+	/**
+	 * 存放所有消息回调函数，根据 message.cmd 来决定调用哪个方法
+	 */
+	const messageHandler = {
+		// 弹出提示
+		alert(global, message) {
+			util.showInfo(message.info);
+		},
+		// 显示错误提示
+		error(global, message) {
+			util.showError(message.info);
+		},
+		// 获取工程名
+		getProjectName(global, message) {
+			invokeCallback(global.panel, message, util.getProjectName(global.projectPath));
+		},
+		// 获取当前激活编辑器内容
+		getFileContent(global, message) {
+			invokeCallback(global.panel, message, util.getFileContent());
+		},
+		// 查找匹配的位置
+		match(global, message) {
+			const length = util.selectStr(util.currentFile, message.rules)
+
+			invokeCallback(global.panel, message, {
+				code: 0,
+				text: '成功',
+				length
+			});
+		},
+		// 替换
+		replace(global, message) {
+			const length = util.selectStr(util.currentFile, message.rules)
+			util.replaceEditorContent(util.currentFile, message.rules);
+			invokeCallback(global.panel, message, {
+				code: 0,
+				text: '成功',
+				length
+			});
+		}
+	};
+
 
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "launch-in-visual-studio" is now active!'); 
 
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with  registerCommand
 	// The commandId parameter must match the command field in package.json
-	var disposable = vscode.commands.registerCommand('extension.launchInVS', function () {
-        
-        var vsPath2022 = 'D:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\Common7\\IDE\\devenv.exe';
-        var vsPath2017E = 'C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\Common7\\IDE\\devenv.exe';
-        var vsPath2017P = 'C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Professional\\Common7\\IDE\\devenv.exe';
-        var vsPath2017C = 'C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\Common7\\IDE\\devenv.exe';
-        var vsPath2015 = 'C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\Common7\\IDE\\devenv.exe';
-        var vsPath2013 = 'C:\\Program Files (x86)\\Microsoft Visual Studio 12.0\\Common7\\IDE\\devenv.exe';
-        var vsPath2012 = 'C:\\Program Files (x86)\\Microsoft Visual Studio 11.0\\Common7\\IDE\\devenv.exe';
-        var vsPath2010 = 'C:\\Program Files (x86)\\Microsoft Visual Studio 10.0\\Common7\\IDE\\devenv.exe';
-        //var vsPath1 = 'C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\Common7\\IDE\\devenv1.exe';
-        
-        
-        var vsPath;
-        
-        if (doesExist(vsPath2017E))
-        {
-            vsPath = vsPath2017E;            
-        }
-        else if (doesExist(vsPath2022))
-        {
-            vsPath = vsPath2022;            
-        }
-        else if (doesExist(vsPath2017C))
-        {
-            vsPath = vsPath2017C;            
-        }
-        else if (doesExist(vsPath2017P))
-        {
-            vsPath = vsPath2017P;            
-        }
-        else if (doesExist(vsPath2015))
-        {
-            vsPath = vsPath2015;            
-        }
-        else if (doesExist(vsPath2013))
-        {
-            vsPath = vsPath2013;            
-        }
-        else if (doesExist(vsPath2012))
-        {
-            vsPath = vsPath2012;            
-        }
-        else if (doesExist(vsPath2010))
-        {
-            vsPath = vsPath2010;            
-        }
-        else 
-        {
-            vscode.window.showErrorMessage('Visual Studio not available on this machine.');
-            return;
-        }
-        
-        
-        var editor = vscode.window.activeTextEditor;
-        if (!editor) {
-            vscode.window.showErrorMessage('Could not find and valid text editor. Please open a file in Code first.');
-            return; // No open text editor
-        }
-        
-        if (editor.document.isUntitled) {
-            vscode.window.showErrorMessage('Please save the file first.');
-            return; // No open text editor
-        }
-        
-        var myfilename = editor.document.fileName;
-         
-        // Display a message box to the user
-        //vscode.window.showInformationMessage('Will open the file ' + text + 'in Visual Studio');
-        
-        // The code you place here will be executed every time your command is executed
-        const execFile = require('child_process').execFile;
-        const bat = execFile(vsPath,
-            ['/edit', myfilename], (error, stdout, stderr) => {
-                console.log(`stdout: ${stdout}`);
-                console.log(`stderr: ${stderr}`);
-                 if (error !== null) {
-                     console.log('Some error occured while launching Visual Studio.');
-                 }
-                
-            });
+	var disposable = vscode.commands.registerCommand('extension.launchInVS', function (uri) {
+		console.log('Congratulations, your extension "launch-in-visual-studio" is now active!');
 
-        // Display a message box to the user
-        console.log('Opened file in VS!');
+		// 工程目录一定要提前获取，因为创建了webview之后activeTextEditor会不准确
+		const projectPath = util.getProjectPath(uri);
+		if (!projectPath) return;
+		const panel = vscode.window.createWebviewPanel(
+			'testWebview', // viewType
+			"Batch Replace", // 视图标题
+			vscode.ViewColumn.Two, // 显示在编辑器的哪个部位
+			{
+				enableScripts: true, // 启用JS，默认禁用
+				retainContextWhenHidden: true, // webview被隐藏时保持状态，避免被重置
+			}
+		);
+		let global = {
+			projectPath,
+			panel
+		};
+		panel.webview.html = util.getWebViewContent(context, 'src/view/batch-replace.html');
+		panel.webview.onDidReceiveMessage(message => {
+			if (messageHandler[message.cmd]) {
+				messageHandler[message.cmd](global, message);
+			} else {
+				util.showError(`未找到名为 ${message.cmd} 回调方法!`);
+			}
+		}, undefined, context.subscriptions);
+
 	});
-	
+
 	context.subscriptions.push(disposable);
 }
 exports.activate = activate;
