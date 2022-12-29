@@ -74,7 +74,7 @@ const util = {
     /**
      * 获取当前工程名
      */
-    getProjectName: function (projectPath) {
+    getProjectName: function(projectPath) {
         return path.basename(projectPath);
     },
     /**
@@ -87,13 +87,16 @@ const util = {
     /**
      * 弹出错误信息
      */
-    showError: function (info) {
+    showError: function(info) {
         vscode.window.showErrorMessage(info);
     },
     /**
      * 弹出提示信息
      */
-    showInfo: function (info) {
+    showInfo: function(info) {
+        vscode.window.showInformationMessage(info);
+    },
+    forTest: function(info) {
         vscode.window.showInformationMessage(info);
     },
     /**
@@ -101,7 +104,7 @@ const util = {
      * @param context 上下文
      * @param relativePath 扩展中某个文件相对于根目录的路径，如 images/test.jpg
      */
-    getExtensionFileAbsolutePath: function (context, relativePath) {
+    getExtensionFileAbsolutePath: function(context, relativePath) {
         return path.join(context.extensionPath, relativePath);
     },
     /**
@@ -110,7 +113,7 @@ const util = {
      * @param rules 匹配规则
      *
      */
-    findStrInFile: function (filePath, rules) {
+    findStrInFile: function(filePath, rules) {
         const content = fs.readFileSync(filePath, 'utf-8');
         let pos = [];
         let matches;
@@ -139,12 +142,12 @@ const util = {
     /**
      * 选中匹配的字符串
      */
-    selectStr: function (filePath, str) {
+    selectStr: function(filePath, str) {
         positions = this.findStrInFile(filePath, str);
         let selections = [];
 
-        
-        
+
+
         for (let i = 0; i < positions.length; i++) {
             selections.push(
                 new vscode.Selection(
@@ -159,7 +162,7 @@ const util = {
     /**
      * 修改当前激活编辑器内容
      */
-    replaceEditorContent: function (filePath, str) {
+    replaceEditorContent: function(filePath, str) {
         editor.edit(editBuilder => {
             // 替换内容
             for (let i = 0; i < positions.length; i++) {

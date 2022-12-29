@@ -20,8 +20,7 @@
                 <span class="operator operate add" @click="add">+</span>
             </div>
             <div class="rules">
-                <div class="rules-item" v-for="(item, index) in replaceRule" @mouseover="item.showDel = true"
-                    @mouseout="item.showDel = false">
+                <div class="rules-item" v-for="(item, index) in replaceRule" @mouseover="item.showDel = true" @mouseout="item.showDel = false">
                     <el-input size="mini" v-model="item.find" placeholder="Search"></el-input>
                     <span class="seperate">→</span>
                     <el-input size="mini" v-model="item.to" placeholder="Replace"></el-input>
@@ -32,6 +31,7 @@
                 <el-button size="mini" @click="match">Search</el-button>
                 <el-button size="mini" @click="replace" type="primary">Replace All</el-button>
                 <el-button size="mini" @click="reset">Reset</el-button>
+                <el-button size="mini" @click="test1">Test</el-button>
             </div>
             <div v-else class="empty">
                 点击右上角 "+" 添加匹配规则
@@ -43,8 +43,7 @@
                 <el-button class="operator clear-his" type="text" @click=resetHistory>清空</el-button>
             </div>
             <div class="history-list">
-                <el-tag v-for="(item, index) in histroyRules" size="mini" class="history-item"
-                    @click="reuseHistory(item)" type="info">
+                <el-tag v-for="(item, index) in histroyRules" size="mini" class="history-item" @click="reuseHistory(item)" type="info">
                     {{item.find}} → {{item.to}}</el-tag>
             </div>
         </el-card>

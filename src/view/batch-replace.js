@@ -28,7 +28,7 @@ window.addEventListener('message', event => {
     switch (message.cmd) {
         case 'vscodeCallback':
             console.log(message.data);
-            (callbacks[message.cbid] || function () {})(message.data);
+            (callbacks[message.cbid] || function() {})(message.data);
             delete callbacks[message.cbid];
             break;
         default:
@@ -55,8 +55,7 @@ new Vue({
     watch: {
         historyRules: {
             deep: true,
-            handler() {
-            }
+            handler() {}
         }
     },
     methods: {
@@ -65,6 +64,13 @@ new Vue({
             callVscode({
                 cmd: 'alert',
                 info: info
+            }, null);
+        },
+        // 模拟alert
+        test1() {
+            callVscode({
+                cmd: 'alert',
+                info: '123'
             }, null);
         },
         // 弹出错误提示
@@ -143,7 +149,7 @@ new Vue({
             this.replaceRule.splice(index, 1);
         },
         reuseHistory(item) {
-            this.replaceRule.push({...item})
+            this.replaceRule.push({...item })
         }
     }
 });
