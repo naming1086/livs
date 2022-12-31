@@ -154,14 +154,16 @@ const util = {
 
 
     RegexpEditor: function(rule) {
-        editor.edit((textEditorEdit) => {
-            textEditorEdit.insert(editor.selection.anchor, '');
-            //https://github.com/microsoft/vscode/blob/1.64.0/src/vs/editor/contrib/find/browser/findController.ts#L588-L599
-            vscode.commands.executeCommand('editor.actions.findWithArgs', {
+        vscode.window.showTextDocument(editor.document.uri).then(()=>{
+            return vscode.commands
+            .executeCommand("editor.actions.findWithArgs", {
+              searchString: "",
+            })
+            .then(() => vscode.commands.executeCommand('editor.actions.findWithArgs', {
                 searchString: rule.find,
                 replaceString: rule.to,
                 isRegex: true,
-            });
+            }));
         });
     },
     /**
