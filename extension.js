@@ -39,21 +39,31 @@ function activate(context) {
         test1(global, message) {
             util.forTest(message.info);
         },
+        // 添加定义
+        addDefine(global) {
+            util.addDefine();
+        },
+        getEditor(global, message) {
+            util.getEditor();
+        },
+        RegexpEditor(global, message) {
+            util.RegexpEditor(message.rule);
+        },
         // 显示错误提示
         error(global, message) {
             util.showError(message.info);
         },
         // 获取工程名
-        getProjectName(global, message) {
-            invokeCallback(global.panel, message, util.getProjectName(global.projectPath));
-        },
+        // getProjectName(global, message) {
+        // invokeCallback(global.panel, message, util.getProjectName(global.projectPath));
+        // },
         // 获取当前激活编辑器内容
         getFileContent(global, message) {
             invokeCallback(global.panel, message, util.getFileContent());
         },
         // 查找匹配的位置
         match(global, message) {
-            const length = util.selectStr(util.currentFile, message.rules)
+            const length = util.selectStr(message.rules)
 
             invokeCallback(global.panel, message, {
                 code: 0,
@@ -63,8 +73,8 @@ function activate(context) {
         },
         // 替换
         replace(global, message) {
-            const length = util.selectStr(util.currentFile, message.rules)
-            util.replaceEditorContent(util.currentFile, message.rules);
+            const length = util.selectStr(message.rules)
+            util.replaceEditorContent(message.rules);
             invokeCallback(global.panel, message, {
                 code: 0,
                 text: '成功',
@@ -74,18 +84,9 @@ function activate(context) {
     };
 
 
-    // Use the console to output diagnostic information (console.log) and errors (console.error)
-    // This line of code will only be executed once when your extension is activated
-
-    // The command has been defined in the package.json file
-    // Now provide the implementation of the command with  registerCommand
-    // The commandId parameter must match the command field in package.json
     var disposable = vscode.commands.registerCommand('extension.launchInVS', function(uri) {
         console.log('Congratulations, your extension "launch-in-visual-studio" is now active!');
 
-        // 工程目录一定要提前获取，因为创建了webview之后activeTextEditor会不准确
-        const projectPath = util.getProjectPath(uri);
-        if (!projectPath) return;
         const panel = vscode.window.createWebviewPanel(
             'testWebview', // viewType
             "Batch Replace", // 视图标题
@@ -95,10 +96,6 @@ function activate(context) {
                 retainContextWhenHidden: true, // webview被隐藏时保持状态，避免被重置
             }
         );
-        let global = {
-            projectPath,
-            panel
-        };
         panel.webview.html = util.getWebViewContent(context, 'src/view/batch-replace.html');
         panel.webview.onDidReceiveMessage(message => {
             if (messageHandler[message.cmd]) {

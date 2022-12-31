@@ -11,9 +11,19 @@
 
 <body>
     <div id="app">
-        <div class="header">
+        <!-- <div class="header">
             <h2>Replace Rules</h2>
-        </div>
+        </div> -->
+        <el-card class="content">
+            <div slot="header" class="history-title">
+                <span>其他</span>
+            </div>
+            <div>
+                <el-button size="mini" @click="getEditor">获取Editor</el-button>
+                <el-button size="mini" @click="addDefine">添加define</el-button>
+                <el-button size="mini" @click="RegexpEditor">RegexpEditor</el-button>
+            </div>
+        </el-card>
         <el-card class="content">
             <div slot="header" class="history-title">
                 <span>操作面板</span>
@@ -25,19 +35,21 @@
                     <span class="seperate">→</span>
                     <el-input size="mini" v-model="item.to" placeholder="Replace"></el-input>
                     <span :class="{ 'hide': !item.showDel }" class="operate del" @click="del(index)">×</span>
+                    <el-button size="mini" @click="replaceOne(index)">ReplaceOne</el-button>
                 </div>
             </div>
             <div v-if="replaceRule.length > 0">
-                <el-button size="mini" @click="match">Search</el-button>
-                <el-button size="mini" @click="replace" type="primary">Replace All</el-button>
-                <el-button size="mini" @click="reset">Reset</el-button>
-                <el-button size="mini" @click="test1">Test</el-button>
+                <!-- <el-button size="mini" @click="match">Search</el-button> -->
+                <!-- <el-button size="mini" @click="replace" type="primary">Replace All</el-button> -->
+                <!-- <el-button size="mini" @click="reset">Reset</el-button> -->
+                <!-- <el-button size="mini" @click="test1">Test</el-button> -->
             </div>
             <div v-else class="empty">
                 点击右上角 "+" 添加匹配规则
             </div>
+
         </el-card>
-        <el-card class="history">
+        <!-- <el-card class="history">
             <div slot="header" class="history-title">
                 <span>历史记录</span>
                 <el-button class="operator clear-his" type="text" @click=resetHistory>清空</el-button>
@@ -46,7 +58,11 @@
                 <el-tag v-for="(item, index) in histroyRules" size="mini" class="history-item" @click="reuseHistory(item)" type="info">
                     {{item.find}} → {{item.to}}</el-tag>
             </div>
-        </el-card>
+        </el-card> -->
+
+
+
+
     </div>
 </body>
 

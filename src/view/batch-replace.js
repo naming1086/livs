@@ -41,11 +41,78 @@ new Vue({
     data: {
         size: 'small',
         fileContent: '这里应该是一段html', // 当前激活编辑器内容
-        replaceRule: [{
-            find: '输入需要替换的内容',
-            to: '',
-            showDel: false
-        }],
+        replaceRule: [
+            {
+                find: String.raw`(sampler[^ ]{0,} (.{1,});)`,
+                to: String.raw`$1float sampler$2;`,
+                showDel: false
+            },
+            {
+                find: String.raw`fract`,
+                to: String.raw`frac`,
+                showDel: false
+            },
+            {
+                find: String.raw`clamp\((.{1,}?), 0.0, 1.0\)`,
+                to: String.raw`saturate($1)`,
+                showDel: false
+            },
+            {
+                find:String.raw`([^a-z0-9]{0,1})mix([0-9]{0,1}\()`,
+                to:String.raw`$1lerp$2`,
+                showDel: false
+            },
+            {
+                find:String.raw`vs_`,
+                to:String.raw`varyings.vs_`,
+                showDel: false
+            },
+            {
+                find:String.raw`([^a-z0-9]{0,1})i{0,1}vec([0-9]{0,1}\()`,
+                to:String.raw`$1float$2`,
+                showDel: false
+            },
+            {
+                find:String.raw`float[2-4]\((.{1,}?),( \1,){0,2} \1\)`,
+                to:String.raw`$1`,
+                showDel: false
+            },
+            {
+                find:String.raw`#ifdef UNITY_ADRENO_ES3[\n\s]{1,}.{1,}[\n\s]{1,}#else[\n]{1,}(.{1,})[\n\s]{1,}#endif`,
+                to:String.raw`$1`,
+                showDel: false
+            },
+            {
+                find:String.raw`texture\((.{1,}?),`,
+                to:String.raw`SAMPLE_TEXTURE2D($1, sampler$1,`,
+                showDel: false
+            },
+            {
+                find:String.raw`textureLod\((.{1,}?),`,
+                to:String.raw`SAMPLE_TEXTURE2D_LOD($1, sampler$1,`,
+                showDel: false
+            },
+            {
+                find:String.raw`((([\S]{1,}?)(\.[xyzw]{1,4}){0,1}) = .{1,} _([_A-Za-z0-9]{1,})ST.xy)`,
+                to:String.raw`half2 $5UV;$1`,
+                showDel: false
+            },
+            {
+                find:String.raw`((([\S]{1,}?)(\.[xyzw]{1,4}){0,1}) = SAMPLE_TEXTURE.{1,}\(_([_A-Za-z0-9]{1,}))`,
+                to:String.raw`half4 $5;$1`,
+                showDel: false
+            },
+            {
+                find:String.raw`([^a-z0-9]{0,1})float([0-9]{0,1}\()([^(,]{1,}?)\)`,
+                to:String.raw`$1$3`,
+                showDel: false
+            },
+            {
+                find:String.raw`(([\S]{1,}?)(\.[xyzw]{1,4}){0,1}) = (.{1,});\n([\s]{1,}\1 =)(.{0,})([ \(-])(\1)([ ,\);])(.{0,})(([ \(])(\1)([ ,\)])){0,1}`,
+                to:String.raw`$5$6$7($4)$9$10`,
+                showDel: false
+            },
+        ],
         histroyRules: []
     },
     mounted() {
@@ -69,7 +136,22 @@ new Vue({
         // 模拟alert
         test1() {
             callVscode({
-                cmd: 'alert',
+                cmd: 'test1',
+                info: '123'
+            }, null);
+        },
+        // 模拟alert
+        addDefine() {
+            callVscode({
+                cmd: 'addDefine',
+                info: '123'
+            }, null);
+        },
+
+        // 模拟alert
+        RegexpEditor() {
+            callVscode({
+                cmd: 'RegexpEditor',
                 info: '123'
             }, null);
         },
@@ -113,12 +195,16 @@ new Vue({
                     ...element
                 })
             });
-
             callVscode({
                 cmd: 'match',
                 rules: this.replaceRule
             }, (data) => {
                 this.alert(`共查找到${data.length}个匹配项`);
+            });
+        },
+        getEditor() {
+            callVscode({
+                cmd: 'getEditor',
             });
         },
         replace() {
@@ -130,12 +216,17 @@ new Vue({
                     ...element
                 })
             });
-
             callVscode({
                 cmd: 'replace',
                 rules: this.replaceRule
             }, (data) => {
                 this.alert(`${data.length}个匹配项已替换`);
+            });
+        },
+        replaceOne(index){
+            callVscode({
+                cmd: 'RegexpEditor',
+                rule: this.replaceRule[index]
             });
         },
         add() {
