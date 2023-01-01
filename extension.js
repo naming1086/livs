@@ -104,7 +104,7 @@ function activate(context) {
                 util.showError(`未找到名为 ${message.cmd} 回调方法!`);
             }
         }, undefined, context.subscriptions);
-
+        util.getEditor();
     });
 
     context.subscriptions.push(disposable);
