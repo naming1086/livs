@@ -41,6 +41,7 @@ new Vue({
     data: {
         size: 'small',
         fileContent: '这里应该是一段html', // 当前激活编辑器内容
+        show: false,
         replaceRule: [
             {
                 find: String.raw`(sampler[^ ]{0,} (.{1,});)`,
@@ -126,6 +127,9 @@ new Vue({
         }
     },
     methods: {
+        cb() {
+            this.show = !this.show;
+        },
         // 模拟alert
         alert(info) {
             callVscode({
