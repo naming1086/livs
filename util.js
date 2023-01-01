@@ -102,41 +102,51 @@ const util = {
         vscode.window.showInformationMessage(info);
     },
     forTest: function(info) {
-        var dic = new Array(); //定义一个字典
-        let content1 = editor.document.getText();
-        vscode.window.showInformationMessage('成功');
-        let pos = [];
-        let contentList = content1.split('\r\n');
-        let rule = new RegExp(/ {1,}?(\S{1,}?) =/, 'ig'); // 正则匹配
-        for (const index in contentList) {
-            while ((matches = rule.exec(contentList[index]))) {
-                var variable = matches[0].trim().replace(" =", "");
-                if (dic.hasOwnProperty(variable) == false) {
-                    dic[variable] = 1;
-                    pos.push({
-                        row: index,
-                        col: rule.lastIndex - matches[0].length
-                    });
-                }
-                else{
-                    dic[variable] = dic[variable] + 1;
-                }
-            }
-        }
-        for (var key in dic) {
-            var item = dic[key];
-            console.log(key,item); //AA,BB,CC,DD
-        }
+
+        // var dic = new Array(); //定义一个字典
+        // let content1 = editor.document.getText();
+        // vscode.window.showInformationMessage('成功');
+        // let pos = [];
+        // let contentList = content1.split('\r\n');
+        // let rule = new RegExp(/ {1,}?(\S{1,}?) =/, 'ig'); // 正则匹配
+        // for (const index in contentList) {
+        //     while ((matches = rule.exec(contentList[index]))) {
+        //         var variable = matches[0].trim().replace(" =", "");
+        //         if (dic.hasOwnProperty(variable) == false) {
+        //             dic[variable] = 1;
+        //             pos.push({
+        //                 row: index,
+        //                 col: rule.lastIndex - matches[0].length
+        //             });
+        //         }
+        //         else{
+        //             dic[variable] = dic[variable] + 1;
+        //         }
+        //     }
+        // }
+        // for (var key in dic) {
+        //     var item = dic[key];
+        //     console.log(key,item); //AA,BB,CC,DD
+        // }
     },
     addDefine: function(info) {
+
+        var range = editor.selection;
+		var raw = editor.document.getText(range);
+        let varying = raw.replace(/(in.{1,}[^a-z0-9]{0,1})vec([0-9]{0,1})/ig, "float$2 ");
+        let addVaryingString = 'struct Varyings \n{ \n ' + varying + '\n};';
+        let varying2 = raw.replace(/(in.{1,}[^a-z0-9]{0,1})vec([0-9]{0,1})/ig, " ").replace(/;\r\n/ig,",").replace(/;/ig,"");
+        let addVaryingString2 = 'Varyings varyings = Varyings(' + varying2 + ');';
+
+
         var addtextString =`
-//第一步输入这个
 #define float2 vec2
 #define float3 vec3
 #define float4 vec4
 #define half mediump float
 #define half2 mediump vec2
-#define half3 mediump vec3 
+#define half3 mediump vec3
+#define half4 mediump vec4
 #define bool2 bvec2
 #define bool3 bvec3
 #define bool4 bvec4
@@ -147,12 +157,13 @@ const util = {
 #define SAMPLE_TEXTURE2D_LOD(sss, sample_Texture, uv, lodLevel) textureLod(sss,uv,lodLevel)
 `
         editor.edit((textEditorEdit) => {
-            textEditorEdit.insert(editor.selection.anchor, addtextString);
+            textEditorEdit.insert(editor.selection.anchor, addtextString + addVaryingString + '\n' +  addVaryingString2);
         });
+
+
     },
-    
-
-
+    varyingVariable: function(){
+    },
     RegexpEditor: function(rule) {
         vscode.window.showTextDocument(editor.document.uri).then(()=>{
             return vscode.commands
