@@ -25,13 +25,13 @@
                 <el-button size="mini"  @click="cb">隐藏/显示操作面板内容</el-button>
             </div>
         </el-card>
-        <el-card class="content">
+        <el-card v-if="show" class="content">
             <div slot="header" class="history-title">
                 <span>正则表达式操作面板</span>
                 <span class="operator operate add" @click="add">+</span>
             </div>
             <div class="rules">
-                <div v-if="show" class="rules-item" v-for="(item, index) in replaceRule" @mouseover="item.showDel = true" @mouseout="item.showDel = false">
+                <div  class="rules-item" v-for="(item, index) in replaceRule" @mouseover="item.showDel = true" @mouseout="item.showDel = false">
                     <el-input size="mini" v-model="item.find" placeholder="Search"></el-input>
                     <span class="seperate">→</span>
                     <el-input size="mini" v-model="item.to" placeholder="Replace"></el-input>
