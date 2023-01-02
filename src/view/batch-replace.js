@@ -41,7 +41,8 @@ new Vue({
     data: {
         size: 'small',
         fileContent: '这里应该是一段html', // 当前激活编辑器内容
-        show: false,
+        showReplacePanel: false,
+        showHightLightReplacePanel: false,
         replaceRule: [
             {
                 find: String.raw`(sampler[^ ]{0,} (.{1,});)`,
@@ -127,8 +128,11 @@ new Vue({
         }
     },
     methods: {
-        cb() {
-            this.show = !this.show;
+        showReplace() {
+            this.showReplacePanel = !this.showReplacePanel;
+        },
+        showHightLightReplace() {
+            this.showHightLightReplacePanel = !this.showHightLightReplacePanel;
         },
         // 模拟alert
         alert(info) {
@@ -209,6 +213,16 @@ new Vue({
         getEditor() {
             callVscode({
                 cmd: 'getEditor',
+            });
+        },
+        replaceNextOne() {
+            callVscode({
+                cmd: 'replaceNextOne',
+            });
+        },
+        getSelection() {
+            callVscode({
+                cmd: 'getSelection',
             });
         },
         replace() {

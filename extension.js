@@ -46,8 +46,14 @@ function activate(context) {
         getEditor(global, message) {
             util.getEditor();
         },
+        getSelection(global, message) {
+            util.getSelection();
+        },
         RegexpEditor(global, message) {
             util.RegexpEditor(message.rule);
+        },
+        replaceNextOne(global, message) {
+            util.replaceNextOne();
         },
         // 显示错误提示
         error(global, message) {
@@ -61,26 +67,26 @@ function activate(context) {
         getFileContent(global, message) {
             invokeCallback(global.panel, message, util.getFileContent());
         },
-        // 查找匹配的位置
-        match(global, message) {
-            const length = util.selectStr(message.rules)
+        // // 查找匹配的位置
+        // match(global, message) {
+        //     const length = util.selectStr(message.rules)
 
-            invokeCallback(global.panel, message, {
-                code: 0,
-                text: '成功',
-                length
-            });
-        },
-        // 替换
-        replace(global, message) {
-            const length = util.selectStr(message.rules)
-            util.replaceEditorContent(message.rules);
-            invokeCallback(global.panel, message, {
-                code: 0,
-                text: '成功',
-                length
-            });
-        }
+        //     invokeCallback(global.panel, message, {
+        //         code: 0,
+        //         text: '成功',
+        //         length
+        //     });
+        // },
+        // // 替换
+        // replace(global, message) {
+        //     const length = util.selectStr(message.rules)
+        //     util.replaceEditorContent(message.rules);
+        //     invokeCallback(global.panel, message, {
+        //         code: 0,
+        //         text: '成功',
+        //         length
+        //     });
+        // }
     };
 
 

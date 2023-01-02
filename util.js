@@ -6,6 +6,9 @@ let document = null;
 let editor = null;
 let currentFile = null;
 let positions = [];
+let hightLightSelection = [];
+let fristLine;
+let replaceIndex = 0;
 
 /**
  * 从某个HTML文件读取能被Webview加载的HTML内容
@@ -24,6 +27,20 @@ function getWebViewContent(context, templatePath) {
     });
     return html;
 }
+
+var TODO_STYLE = {
+    overviewRulerLane: vscode.OverviewRulerLane.Right,
+    overviewRulerColor: '#FFF176',
+    light: {
+        // this color will be used in light color themes
+        backgroundColor: '#FFF176'
+    },
+    dark: {
+        // this color will be used in dark color themes
+        color: '#fff',
+        backgroundColor: 'red'
+    }
+};
 
 const util = {
     getWebViewContent: getWebViewContent,
@@ -103,6 +120,8 @@ const util = {
     },
     forTest: function(info) {
 
+
+
         // var dic = new Array(); //定义一个字典
         // let content1 = editor.document.getText();
         // vscode.window.showInformationMessage('成功');
@@ -159,8 +178,6 @@ const util = {
         editor.edit((textEditorEdit) => {
             textEditorEdit.insert(editor.selection.anchor, addtextString + addVaryingString + '\n' +  addVaryingString2);
         });
-
-
     },
     varyingVariable: function(){
     },
@@ -185,55 +202,68 @@ const util = {
     getExtensionFileAbsolutePath: function(context, relativePath) {
         return path.join(context.extensionPath, relativePath);
     },
+    getSelection:function(){
+
+        let raw1 = [];
+        var range = editor.selection;
+		var raw = editor.document.getText(range).trim();
+        raw1.push(raw);
+
+        replaceIndex = 0;
+        fristLine = editor.document.getText(new vscode.Range(
+            editor.selection.start,
+            new vscode.Position(editor.selection.anchor.line + 1, 0)
+        )).replace(/(\S{1,}?) =/ig, '').replace('\r\n','').replace(';','');
+
+        let content1 = editor.document.getText(new vscode.Range(
+            new vscode.Position(editor.selection.anchor.line + 1, 0),
+            new vscode.Position(editor.document.lineCount + 1, 0),
+        ));
+        this.selectStr(content1, raw1);
+    },
     /**
-     * 从某个文件里面查找字符串，返回匹配的行与列，未找到返回第一行第一列
-     * @param rules 匹配规则
-     *
+     * 选中匹配的字符串
      */
-    findStrInFile: function(rules) {
-        let content = editor.document.getText();
-        let pos = [];
+    selectStr: function(content, str) {
+        let todoDecorationType = vscode.window.createTextEditorDecorationType(TODO_STYLE);
+
+        positions = [];
         let matches;
-        for (let index = 0; index < rules.length; index++) {
+        for (let index = 0; index < str.length; index++) {
             const rows = content.split('\r\n'); // 分行查找只为了拿到行
-            let rule = new RegExp(rules[index].find, 'g'); // 正则匹配
+            let rule = new RegExp(str[index], 'ig'); // 正则匹配
             for (let i = 0; i < rows.length; i++) {
                 while ((matches = rule.exec(rows[i]))) {
-                    pos.push({
-                        rule: rules[index].find,
-                        to: rules[index].to,
-                        row: i,
+                    positions.push({
+                        rule: str[index],
+                        row: editor.selection.anchor.line + 1 + i,
                         col: rule.lastIndex - matches[0].length
                     });
                 }
             }
         }
-        console.log(`共查找到${pos.length}个匹配项`, pos);
-        return pos || [{
-            row: 0,
-            col: 0,
-            to: '',
-            rule: ''
-        }];
-    },
-    /**
-     * 选中匹配的字符串
-     */
-    selectStr: function(str) {
-        positions = this.findStrInFile(str);
-        let selections = [];
-
-
+        hightLightSelection = [];
         for (let i = 0; i < positions.length; i++) {
-            selections.push(
+            hightLightSelection.push(
                 new vscode.Selection(
                     new vscode.Position(positions[i].row, positions[i].col),
                     new vscode.Position(positions[i].row, positions[i].col + positions[i].rule.length)
                 )
             )
-            editor.selections = selections;
         }
+        editor.setDecorations(todoDecorationType, hightLightSelection);
         return positions.length;
+    },
+    replaceNextOne: function(){
+        console.log(positions);
+        editor.edit(editBuilder => {
+            // 替换内容
+            editBuilder.replace(new vscode.Range(
+                new vscode.Position(positions[replaceIndex].row, positions[replaceIndex].col),
+                new vscode.Position(positions[replaceIndex].row, positions[replaceIndex].col + positions[replaceIndex].rule.length)
+            ), fristLine);
+        });
+        replaceIndex += 1;
     },
     /**
      * 修改当前激活编辑器内容

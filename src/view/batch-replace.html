@@ -21,11 +21,12 @@
             <div>
                 <el-button size="mini" @click="getEditor">获取Editor</el-button>
                 <el-button size="mini" @click="addDefine">添加define</el-button>
-                <el-button size="mini"  @click="cb">隐藏/显示操作面板内容</el-button>
+                <el-button size="mini"  @click="showReplace" >{{ showReplacePanel ? '隐藏替换面板' : '显示替换面板' }} </el-button>
+                <el-button size="mini"  @click="showHightLightReplace">{{ showHightLightReplacePanel ? '隐藏高亮面板' : '显示高亮面板' }}</el-button>
                 <el-button size="mini"  @click="test1">测试接口</el-button>
             </div>
         </el-card>
-        <el-card v-if="show" class="content">
+        <el-card v-if="showReplacePanel" class="content">
             <div slot="header" class="history-title">
                 <span>正则表达式操作面板</span>
                 <span class="operator operate add" @click="add">+</span>
@@ -48,8 +49,16 @@
             <div v-else class="empty">
                 点击右上角 "+" 添加匹配规则
             </div>
-
         </el-card>
+        <el-card v-if="showHightLightReplacePanel" class="content">
+            <div slot="header" class="history-title">
+                <span>高亮替换操作面板</span>
+            </div>
+            <el-button size="mini" @click="getSelection">高亮选择部分</el-button>
+            <el-button size="mini" @click="replaceNextOne">替换下一个</el-button>
+        </el-card>
+
+
         <!-- <el-card class="history">
             <div slot="header" class="history-title">
                 <span>历史记录</span>
