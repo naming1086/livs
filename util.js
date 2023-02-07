@@ -145,15 +145,18 @@ const util = {
            // 存在多个相同标签的情况 总数需要叠加
            if (textMatch) { 
               var variable = textMatch[0].trim().replace(" =", ""); //这个是整个=号前的字符串
-              if (dicSimpleMore.hasOwnProperty(variable) == false) {
-                dicSimpleMore[variable] = 1; //储存第一次的位置
+              var variable2 = variable.replace(/\..{1,}/g, ""); //这个是整个.前的字符串
+              if (dicSimpleMore.hasOwnProperty(variable2) == false) {
+                dicSimpleMore[variable2] = new Array(); //储存第一次的位置
+                dicSimpleMore[variable2][variable] = 1;
+              }
+              else if(dicSimpleMore[variable2].hasOwnProperty(variable) == false){
+                dicSimpleMore[variable2][variable] = 1;
               }
               else {
-                dicSimpleMore[variable] += 1;
+                dicSimpleMore[variable2][variable] += 1;
               }
 
-
-              var variable2 = variable.replace(/\..{1,}/g, ""); //这个是整个.前的字符串
               if (dicOnlyOne.hasOwnProperty(variable2) == false) {
                 dicOnlyOne[variable2] = 1; //储存第一次的位置
               }
@@ -162,44 +165,64 @@ const util = {
               }
            }
         }
-        var index = 0;
-        for(var key in dicOnlyOne){
-            index = index+1;
-            
-            vscode.window.showTextDocument(editor.document.uri).then(()=>{
-                return vscode.commands
-                .executeCommand('workbench.action.replaceInFiles', {
-                    searchString: key,
-                    replaceString: "Only" + index,
-                    findInSelection: false,
-                    isRegex : false,
-                    matchWholeWord :  true
-                }).then((sss)=>{
-                    var ranges = editor.selections;
-                    ranges.forEach(range => {
-                        var raw = editor.document.getText(range).trim();
-                    });
-                    vscode.commands.executeCommand('search.action.replaceAll');
-                })
-            });
-            if (300) await new Promise(r => setTimeout(r, 300));
-        }
-        
-        // index = 0;
-        // for(var key in dicSimpleMore){
-        //     var variable3 = key.trim().replace(/\.{1,}/g, ""); //这个是整个.前的字符串
+        // var index = 0;
+        // for(var key in dicOnlyOne){
         //     index = index+1;
-        //     vscode.window.showTextDocument(editor.document.uri).then(()=>{
-        //         return vscode.commands
-        //         .executeCommand('editor.actions.findWithArgs', {
-        //             searchString: variable3,
-        //             replaceString: "Simple" + index,
-        //             findInSelection: false,
-        //             isRegex : false,
-        //             matchWholeWord :  true
-        //         })
-        //     });
+        //     if (dicOnlyOne[key] == 1) {
+        //         vscode.window.showTextDocument(editor.document.uri).then(()=>{
+        //             vscode.commands
+        //             .executeCommand('workbench.action.findInFiles', {
+        //                 find: key,
+        //                 query: key,
+        //                 replace: "Only" + index,
+        //                 isRegex : false,
+        //                 matchWholeWord :  true,
+        //                 triggerReplaceAll: false,
+        //                 triggerSearch : true,
+        //                 filesToInclude : path.basename(editor.document.uri.fsPath)
+        //             }).then(()=>{
+        //                 setTimeout(async () => {
+        //                     await vscode.commands.executeCommand('search.action.replaceAll');
+        //                           }, 1000);
+        //             })
+        //         });
+        //         if (3000) await new Promise(r => setTimeout(r, 3000));
+        //     }
         // }
+        
+        index = 0;
+        var index2 = 0;
+        for(var key1 in dicSimpleMore){
+            index2 = 0;
+            for(var key2 in dicSimpleMore[key1]){
+                index2 += 1;
+                if (index2 > 1) {
+                    break;
+                }
+            }
+
+            if (index2 == 1) {
+                index = index+1;
+                vscode.window.showTextDocument(editor.document.uri).then(()=>{
+                    vscode.commands
+                    .executeCommand('workbench.action.findInFiles', {
+                        find: key1,
+                        query: key1,
+                        replace: "Simple" + index,
+                        isRegex : false,
+                        matchWholeWord :  true,
+                        triggerReplaceAll: false,
+                        triggerSearch : true,
+                        filesToInclude : path.basename(editor.document.uri.fsPath)
+                    }).then(()=>{
+                        setTimeout(async () => {
+                            await vscode.commands.executeCommand('search.action.replaceAll');
+                                  }, 1000);
+                    })
+                });
+                if (3000) await new Promise(r => setTimeout(r, 3000));
+            }
+        }
     },
     addDefine: function(info) {
 
