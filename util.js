@@ -118,34 +118,87 @@ const util = {
     showInfo: function(info) {
         vscode.window.showInformationMessage(info);
     },
-    forTest: function(info) {
+    ReplaceAll:async function(key,index){
 
 
+        await vscode.commands.executeCommand('editor.actions.findWithArgs', {
+            searchString: key,
+            replaceString: "Only" + index,
+            findInSelection: false,
+            isRegex : false,
+            matchWholeWord :  true
+        }).then(async ()=>{
+            setTimeout(async () => {
+                await vscode.commands.executeCommand('search.action.replaceAll');
+                      }, 100);
+        });
 
-        // var dic = new Array(); //定义一个字典
-        // let content1 = editor.document.getText();
-        // vscode.window.showInformationMessage('成功');
-        // let pos = [];
-        // let contentList = content1.split('\r\n');
-        // let rule = new RegExp(/ {1,}?(\S{1,}?) =/, 'ig'); // 正则匹配
-        // for (const index in contentList) {
-        //     while ((matches = rule.exec(contentList[index]))) {
-        //         var variable = matches[0].trim().replace(" =", "");
-        //         if (dic.hasOwnProperty(variable) == false) {
-        //             dic[variable] = 1;
-        //             pos.push({
-        //                 row: index,
-        //                 col: rule.lastIndex - matches[0].length
-        //             });
-        //         }
-        //         else{
-        //             dic[variable] = dic[variable] + 1;
-        //         }
-        //     }
-        // }
-        // for (var key in dic) {
-        //     var item = dic[key];
-        //     console.log(key,item); //AA,BB,CC,DD
+    },
+    forTest: async  function(info) {
+        var dicOnlyOne = new Array(); //定义一个字典
+        var dicSimpleMore = new Array(); //定义一个字典
+        let content = editor.document.getText().replace(/\"/g, '\'');
+        let contentList = content.split('\r\n');
+        let id = 0;
+        for (const index in contentList) {
+           let textMatch = contentList[index].match(new RegExp(/ {1,}?(\S{1,}?) =/, 'ig'));
+           // 存在多个相同标签的情况 总数需要叠加
+           if (textMatch) { 
+              var variable = textMatch[0].trim().replace(" =", ""); //这个是整个=号前的字符串
+              if (dicSimpleMore.hasOwnProperty(variable) == false) {
+                dicSimpleMore[variable] = 1; //储存第一次的位置
+              }
+              else {
+                dicSimpleMore[variable] += 1;
+              }
+
+
+              var variable2 = variable.replace(/\..{1,}/g, ""); //这个是整个.前的字符串
+              if (dicOnlyOne.hasOwnProperty(variable2) == false) {
+                dicOnlyOne[variable2] = 1; //储存第一次的位置
+              }
+              else {
+                dicOnlyOne[variable2] += 1;
+              }
+           }
+        }
+        var index = 0;
+        for(var key in dicOnlyOne){
+            index = index+1;
+            
+            vscode.window.showTextDocument(editor.document.uri).then(()=>{
+                return vscode.commands
+                .executeCommand('workbench.action.replaceInFiles', {
+                    searchString: key,
+                    replaceString: "Only" + index,
+                    findInSelection: false,
+                    isRegex : false,
+                    matchWholeWord :  true
+                }).then((sss)=>{
+                    var ranges = editor.selections;
+                    ranges.forEach(range => {
+                        var raw = editor.document.getText(range).trim();
+                    });
+                    vscode.commands.executeCommand('search.action.replaceAll');
+                })
+            });
+            if (300) await new Promise(r => setTimeout(r, 300));
+        }
+        
+        // index = 0;
+        // for(var key in dicSimpleMore){
+        //     var variable3 = key.trim().replace(/\.{1,}/g, ""); //这个是整个.前的字符串
+        //     index = index+1;
+        //     vscode.window.showTextDocument(editor.document.uri).then(()=>{
+        //         return vscode.commands
+        //         .executeCommand('editor.actions.findWithArgs', {
+        //             searchString: variable3,
+        //             replaceString: "Simple" + index,
+        //             findInSelection: false,
+        //             isRegex : false,
+        //             matchWholeWord :  true
+        //         })
+        //     });
         // }
     },
     addDefine: function(info) {
@@ -202,6 +255,10 @@ const util = {
     getExtensionFileAbsolutePath: function(context, relativePath) {
         return path.join(context.extensionPath, relativePath);
     },
+    simpleOne:function() {
+
+    },
+
     getSelection:function(){
 
         let raw1 = [];
@@ -226,6 +283,7 @@ const util = {
      */
     selectStr: function(content, str) {
         let todoDecorationType = vscode.window.createTextEditorDecorationType(TODO_STYLE);
+        editor.setDecorations({}, hightLightSelection);
 
         positions = [];
         let matches;
@@ -251,7 +309,8 @@ const util = {
                 )
             )
         }
-        editor.setDecorations(todoDecorationType, hightLightSelection);
+        console.log(hightLightSelection);
+        //editor.setDecorations(todoDecorationType, hightLightSelection);
         return positions.length;
     },
     replaceNextOne: function(){

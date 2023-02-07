@@ -36,8 +36,8 @@ function activate(context) {
             util.showInfo(message.info);
         },
         // 弹出提示
-        test1(global, message) {
-            util.forTest(message.info);
+        test1 (global, message) {
+             util.forTest(message.info);
         },
         // 添加定义
         addDefine(global) {
