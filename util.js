@@ -146,49 +146,53 @@ const util = {
            if (textMatch) { 
               var variable = textMatch[0].trim().replace(" =", ""); //这个是整个=号前的字符串
               var variable2 = variable.replace(/\..{1,}/g, ""); //这个是整个.前的字符串
-              if (dicSimpleMore.hasOwnProperty(variable2) == false) {
-                dicSimpleMore[variable2] = new Array(); //储存第一次的位置
-                dicSimpleMore[variable2][variable] = 1;
-              }
-              else if(dicSimpleMore[variable2].hasOwnProperty(variable) == false){
-                dicSimpleMore[variable2][variable] = 1;
-              }
-              else {
-                dicSimpleMore[variable2][variable] += 1;
-              }
-
-              if (dicOnlyOne.hasOwnProperty(variable2) == false) {
-                dicOnlyOne[variable2] = 1; //储存第一次的位置
-              }
-              else {
-                dicOnlyOne[variable2] += 1;
+              if (!variable2.includes("SV_") && !variable2.includes("vs_TEXCOORD")) {
+                  if (dicSimpleMore.hasOwnProperty(variable2) == false) {
+                      dicSimpleMore[variable2] = new Array(); //储存第一次的位置
+                      dicSimpleMore[variable2][variable] = 1;
+                    }
+                    else if(dicSimpleMore[variable2].hasOwnProperty(variable) == false){
+                      dicSimpleMore[variable2][variable] = 1;
+                    }
+                    else {
+                      dicSimpleMore[variable2][variable] += 1;
+                    }
+        
+                    if (dicOnlyOne.hasOwnProperty(variable2) == false) {
+                      dicOnlyOne[variable2] = 1; //储存第一次的位置
+                    }
+                    else {
+                      dicOnlyOne[variable2] += 1;
+                    }
               }
            }
         }
-        // var index = 0;
-        // for(var key in dicOnlyOne){
-        //     index = index+1;
-        //     if (dicOnlyOne[key] == 1) {
-        //         vscode.window.showTextDocument(editor.document.uri).then(()=>{
-        //             vscode.commands
-        //             .executeCommand('workbench.action.findInFiles', {
-        //                 find: key,
-        //                 query: key,
-        //                 replace: "Only" + index,
-        //                 isRegex : false,
-        //                 matchWholeWord :  true,
-        //                 triggerReplaceAll: false,
-        //                 triggerSearch : true,
-        //                 filesToInclude : path.basename(editor.document.uri.fsPath)
-        //             }).then(()=>{
-        //                 setTimeout(async () => {
-        //                     await vscode.commands.executeCommand('search.action.replaceAll');
-        //                           }, 1000);
-        //             })
-        //         });
-        //         if (3000) await new Promise(r => setTimeout(r, 3000));
-        //     }
-        // }
+        
+        var index = 0;
+        for(var key in dicOnlyOne){
+            index = index+1;
+            if (dicOnlyOne[key] == 1) {
+                vscode.window.showTextDocument(editor.document.uri).then(()=>{
+                    vscode.commands
+                    .executeCommand('workbench.action.findInFiles', {
+                        find: key,
+                        query: key,
+                        replace: "Only" + index,
+                        isRegex : false,
+                        matchWholeWord :  true,
+                        triggerReplaceAll: false,
+                        triggerSearch : true,
+                        filesToInclude : path.basename(editor.document.uri.fsPath)
+                    }).then(()=>{
+                        setTimeout(async () => {
+                            await vscode.commands.executeCommand('search.action.replaceAll');
+                                  }, 1000);
+                    })
+                });
+                if (3000) await new Promise(r => setTimeout(r, 3000));
+            }
+        }
+
         
         index = 0;
         var index2 = 0;
@@ -223,6 +227,8 @@ const util = {
                 if (3000) await new Promise(r => setTimeout(r, 3000));
             }
         }
+
+
     },
     addDefine: function(info) {
 
@@ -259,15 +265,11 @@ const util = {
     },
     RegexpEditor: function(rule) {
         vscode.window.showTextDocument(editor.document.uri).then(()=>{
-            return vscode.commands
-            .executeCommand("editor.actions.findWithArgs", {
-              searchString: "",
-            })
-            .then(() => vscode.commands.executeCommand('editor.actions.findWithArgs', {
+            vscode.commands.executeCommand('editor.actions.findWithArgs', {
                 searchString: rule.find,
                 replaceString: rule.to,
                 isRegex: true,
-            }));
+            })
         });
     },
     /**
