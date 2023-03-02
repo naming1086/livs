@@ -159,6 +159,12 @@ new Vue({
                 info: '123'
             }, null);
         },
+        replaceOnlyOrSimilar() {
+            callVscode({
+                cmd: 'replaceOnlyOrSimilar',
+                info: '123'
+            }, null);
+        },
         // 模拟alert
         addDefine() {
             callVscode({

@@ -35,9 +35,13 @@ function activate(context) {
         alert(global, message) {
             util.showInfo(message.info);
         },
-        // 弹出提示
+        // 测试用的
         test1 (global, message) {
              util.forTest(message.info);
+        },
+        // 弹出提示
+        replaceOnlyOrSimilar (global, message) {
+             util.replaceOnlyOrSimilar(message.info);
         },
         // 添加定义
         addDefine(global) {

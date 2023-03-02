@@ -45,7 +45,7 @@ var TODO_STYLE = {
 const util = {
     getWebViewContent: getWebViewContent,
     currentFile: currentFile,
-    
+
     /**
      * 获取当前所在工程根目录，有3种使用方法：<br>
      * getProjectPath(uri) uri 表示工程内某个文件的路径<br>
@@ -109,96 +109,119 @@ const util = {
     /**
      * 弹出错误信息
      */
-    showError: function(info) {
+    showError: function (info) {
         vscode.window.showErrorMessage(info);
     },
     /**
      * 弹出提示信息
      */
-    showInfo: function(info) {
+    showInfo: function (info) {
         vscode.window.showInformationMessage(info);
     },
-    ReplaceAll:async function(key,index){
-
-
+    ReplaceAll: async function (key, index) {
         await vscode.commands.executeCommand('editor.actions.findWithArgs', {
             searchString: key,
             replaceString: "Only" + index,
             findInSelection: false,
-            isRegex : false,
-            matchWholeWord :  true
-        }).then(async ()=>{
+            isRegex: false,
+            matchWholeWord: true
+        }).then(async () => {
             setTimeout(async () => {
                 await vscode.commands.executeCommand('search.action.replaceAll');
-                      }, 100);
+            }, 100);
         });
 
     },
-    forTest: async  function(info) {
+    ReplaceAll2: function (key, replaceString1) {
+        vscode.commands.executeCommand('editor.actions.findWithArgs', {
+            searchString: key,
+            replaceString: replaceString1,
+            findInSelection: false,
+            isRegex: false,
+            matchWholeWord: true
+        }).then(() => {
+            for (let index = 0; index < 100; index++) {
+                vscode.commands.executeCommand('editor.action.nextMatchFindAction').then(() => {
+                    var range = editor.selection;
+                    var raw = editor.document.getText(range);
+                    vscode.commands.executeCommand('editor.action.replaceOne');
+                });
+            }
+        });
+    },
+    ReplaceForMulit: async function () {
+        vscode.commands.executeCommand('editor.actions.findWithArgs', {
+            searchString: String.raw`(([\S]{1,}?)(\.[xyzw]{1,4}){0,1}) = (.{1,});\n([\s]{1,}\1 =)(.{0,})([ \(-])(\1)([ ,\);])(.{0,})(([ \(])(\1)([ ,\)])){0,1}`,
+            replaceString: String.raw`$5$6$7($4)$9$10`,
+            findInSelection: false,
+            isRegex: true,
+            matchWholeWord: false
+        }).then(async () => {
+            for (let index = 0; index < 100; index++) {
+                await vscode.commands.executeCommand('editor.action.nextMatchFindAction').then( async () => {
+                    var range = editor.selection;
+                    var raw = editor.document.getText(range);
+                    var regex = /(([\S]{1,}?)(\.[xyzw]{1,4}){0,1}) = (.{1,});\r\n([\s]{1,}\1 =)((.{0,})([ \(-])(\1)([ ,\);])(.{0,})){2,}/;
+                    var result = regex.test(raw);
+                    if (!result) {
+                        await vscode.commands.executeCommand('editor.action.replaceOne').then(async () => {
+                            if (300) await new Promise(r => setTimeout(r, 300));
+                        });
+                    }
+                });
+            }
+        });
+        if (200) await new Promise(r => setTimeout(r, 200));
+    },
+    replaceOnlyOrSimilar: async function (info) {
         var dicOnlyOne = new Array(); //定义一个字典
         var dicSimpleMore = new Array(); //定义一个字典
         let content = editor.document.getText().replace(/\"/g, '\'');
         let contentList = content.split('\r\n');
         let id = 0;
         for (const index in contentList) {
-           let textMatch = contentList[index].match(new RegExp(/ {1,}?(\S{1,}?) =/, 'ig'));
-           // 存在多个相同标签的情况 总数需要叠加
-           if (textMatch) { 
-              var variable = textMatch[0].trim().replace(" =", ""); //这个是整个=号前的字符串
-              var variable2 = variable.replace(/\..{1,}/g, ""); //这个是整个.前的字符串
-              if (!variable2.includes("SV_") && !variable2.includes("vs_TEXCOORD")) {
-                  if (dicSimpleMore.hasOwnProperty(variable2) == false) {
-                      dicSimpleMore[variable2] = new Array(); //储存第一次的位置
-                      dicSimpleMore[variable2][variable] = 1;
+            let textMatch = contentList[index].match(new RegExp(/^ {1,}?(\S{1,}?) =/, 'ig'));
+            // 存在多个相同标签的情况 总数需要叠加
+            if (textMatch) {
+                var variable = textMatch[0].trim().replace(" =", ""); //这个是整个=号前的字符串
+                var variable2 = variable.replace(/\..{1,}/g, ""); //这个是整个.前的字符串
+                if (!variable2.includes("SV_") && !variable2.includes("vs_TEXCOORD")) {
+                    if (dicSimpleMore.hasOwnProperty(variable2) == false) {
+                        dicSimpleMore[variable2] = new Array(); //储存第一次的位置
+                        dicSimpleMore[variable2][variable] = 1;
                     }
-                    else if(dicSimpleMore[variable2].hasOwnProperty(variable) == false){
-                      dicSimpleMore[variable2][variable] = 1;
+                    else if (dicSimpleMore[variable2].hasOwnProperty(variable) == false) {
+                        dicSimpleMore[variable2][variable] = 1;
                     }
                     else {
-                      dicSimpleMore[variable2][variable] += 1;
+                        dicSimpleMore[variable2][variable] += 1;
                     }
-        
+
                     if (dicOnlyOne.hasOwnProperty(variable2) == false) {
-                      dicOnlyOne[variable2] = 1; //储存第一次的位置
+                        dicOnlyOne[variable2] = 1; //储存第一次的位置
                     }
                     else {
-                      dicOnlyOne[variable2] += 1;
+                        dicOnlyOne[variable2] += 1;
                     }
-              }
-           }
+                }
+            }
         }
-        
         var index = 0;
-        for(var key in dicOnlyOne){
-            index = index+1;
+        for (var key in dicOnlyOne) {
+            index = index + 1;
             if (dicOnlyOne[key] == 1) {
-                vscode.window.showTextDocument(editor.document.uri).then(()=>{
-                    vscode.commands
-                    .executeCommand('workbench.action.findInFiles', {
-                        find: key,
-                        query: key,
-                        replace: "Only" + index,
-                        isRegex : false,
-                        matchWholeWord :  true,
-                        triggerReplaceAll: false,
-                        triggerSearch : true,
-                        filesToInclude : path.basename(editor.document.uri.fsPath)
-                    }).then(()=>{
-                        setTimeout(async () => {
-                            await vscode.commands.executeCommand('search.action.replaceAll');
-                                  }, 1000);
-                    })
+                await vscode.window.showTextDocument(editor.document.uri).then(async () => {
+                    this.ReplaceAll2(key, "Only" + index);
+                    if (1000) await new Promise(r => setTimeout(r, 1000));
                 });
-                if (3000) await new Promise(r => setTimeout(r, 3000));
             }
         }
 
-        
         index = 0;
         var index2 = 0;
-        for(var key1 in dicSimpleMore){
+        for (var key1 in dicSimpleMore) {
             index2 = 0;
-            for(var key2 in dicSimpleMore[key1]){
+            for (var key2 in dicSimpleMore[key1]) {
                 index2 += 1;
                 if (index2 > 1) {
                     break;
@@ -206,41 +229,33 @@ const util = {
             }
 
             if (index2 == 1) {
-                index = index+1;
-                vscode.window.showTextDocument(editor.document.uri).then(()=>{
-                    vscode.commands
-                    .executeCommand('workbench.action.findInFiles', {
-                        find: key1,
-                        query: key1,
-                        replace: "Simple" + index,
-                        isRegex : false,
-                        matchWholeWord :  true,
-                        triggerReplaceAll: false,
-                        triggerSearch : true,
-                        filesToInclude : path.basename(editor.document.uri.fsPath)
-                    }).then(()=>{
-                        setTimeout(async () => {
-                            await vscode.commands.executeCommand('search.action.replaceAll');
-                                  }, 1000);
-                    })
+                index = index + 1;
+                await vscode.window.showTextDocument(editor.document.uri).then(async () => {
+                    this.ReplaceAll2(key1, "Simple" + index);
+                    if (1000) await new Promise(r => setTimeout(r, 1000));
                 });
-                if (3000) await new Promise(r => setTimeout(r, 3000));
             }
         }
 
+    },
+    forTest: async function (info) {
+
+        vscode.window.showTextDocument(editor.document.uri).then(() => {
+            this.ReplaceForMulit();
+        });
 
     },
-    addDefine: function(info) {
+    addDefine: function (info) {
 
         var range = editor.selection;
-		var raw = editor.document.getText(range);
+        var raw = editor.document.getText(range);
         let varying = raw.replace(/(in.{1,}[^a-z0-9]{0,1})vec([0-9]{0,1})/ig, "float$2 ");
         let addVaryingString = 'struct Varyings \n{ \n ' + varying + '\n};';
-        let varying2 = raw.replace(/(in.{1,}[^a-z0-9]{0,1})vec([0-9]{0,1})/ig, " ").replace(/;\r\n/ig,",").replace(/;/ig,"");
+        let varying2 = raw.replace(/(in.{1,}[^a-z0-9]{0,1})vec([0-9]{0,1})/ig, " ").replace(/;\r\n/ig, ",").replace(/;/ig, "");
         let addVaryingString2 = 'Varyings varyings = Varyings(' + varying2 + ');';
 
 
-        var addtextString =`
+        var addtextString = `
 #define float2 vec2
 #define float3 vec3
 #define float4 vec4
@@ -258,13 +273,13 @@ const util = {
 #define SAMPLE_TEXTURE2D_LOD(sss, sample_Texture, uv, lodLevel) textureLod(sss,uv,lodLevel)
 `
         editor.edit((textEditorEdit) => {
-            textEditorEdit.insert(editor.selection.anchor, addtextString + addVaryingString + '\n' +  addVaryingString2);
+            textEditorEdit.insert(editor.selection.anchor, addtextString + addVaryingString + '\n' + addVaryingString2);
         });
     },
-    varyingVariable: function(){
+    varyingVariable: function () {
     },
-    RegexpEditor: function(rule) {
-        vscode.window.showTextDocument(editor.document.uri).then(()=>{
+    RegexpEditor: function (rule) {
+        vscode.window.showTextDocument(editor.document.uri).then(() => {
             vscode.commands.executeCommand('editor.actions.findWithArgs', {
                 searchString: rule.find,
                 replaceString: rule.to,
@@ -277,25 +292,25 @@ const util = {
      * @param context 上下文
      * @param relativePath 扩展中某个文件相对于根目录的路径，如 images/test.jpg
      */
-    getExtensionFileAbsolutePath: function(context, relativePath) {
+    getExtensionFileAbsolutePath: function (context, relativePath) {
         return path.join(context.extensionPath, relativePath);
     },
-    simpleOne:function() {
+    simpleOne: function () {
 
     },
 
-    getSelection:function(){
+    getSelection: function () {
 
         let raw1 = [];
         var range = editor.selection;
-		var raw = editor.document.getText(range).trim();
+        var raw = editor.document.getText(range).trim();
         raw1.push(raw);
 
         replaceIndex = 0;
         fristLine = editor.document.getText(new vscode.Range(
             editor.selection.start,
             new vscode.Position(editor.selection.anchor.line + 1, 0)
-        )).replace(/(\S{1,}?) =/ig, '').replace('\r\n','').replace(';','');
+        )).replace(/(\S{1,}?) =/ig, '').replace('\r\n', '').replace(';', '');
 
         let content1 = editor.document.getText(new vscode.Range(
             new vscode.Position(editor.selection.anchor.line + 1, 0),
@@ -306,7 +321,7 @@ const util = {
     /**
      * 选中匹配的字符串
      */
-    selectStr: function(content, str) {
+    selectStr: function (content, str) {
         let todoDecorationType = vscode.window.createTextEditorDecorationType(TODO_STYLE);
         editor.setDecorations({}, hightLightSelection);
 
@@ -338,7 +353,7 @@ const util = {
         //editor.setDecorations(todoDecorationType, hightLightSelection);
         return positions.length;
     },
-    replaceNextOne: function(){
+    replaceNextOne: function () {
         console.log(positions);
         editor.edit(editBuilder => {
             // 替换内容
@@ -352,7 +367,7 @@ const util = {
     /**
      * 修改当前激活编辑器内容
      */
-    replaceEditorContent: function(str) {
+    replaceEditorContent: function (str) {
         editor.edit(editBuilder => {
             // 替换内容
             for (let i = 0; i < positions.length; i++) {
