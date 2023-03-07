@@ -149,7 +149,7 @@ const util = {
             }
         });
     },
-    ReplaceForMulit: async function () {
+    ReplaceForMulit:  function () {
         vscode.commands.executeCommand('editor.actions.findWithArgs', {
             searchString: String.raw`(([\S]{1,}?)(\.[xyzw]{1,4}){0,1}) = (.{1,});\n([\s]{1,}\1 =)(.{0,})([ \(-])(\1)([ ,\);])(.{0,})(([ \(])(\1)([ ,\)])){0,1}`,
             replaceString: String.raw`$5$6$7($4)$9$10`,
@@ -158,20 +158,21 @@ const util = {
             matchWholeWord: false
         }).then(async () => {
             for (let index = 0; index < 100; index++) {
-                await vscode.commands.executeCommand('editor.action.nextMatchFindAction').then( async () => {
-                    var range = editor.selection;
-                    var raw = editor.document.getText(range);
-                    var regex = /(([\S]{1,}?)(\.[xyzw]{1,4}){0,1}) = (.{1,});\r\n([\s]{1,}\1 =)((.{0,})([ \(-])(\1)([ ,\);])(.{0,})){2,}/;
-                    var result = regex.test(raw);
-                    if (!result) {
-                        await vscode.commands.executeCommand('editor.action.replaceOne').then(async () => {
-                            if (300) await new Promise(r => setTimeout(r, 300));
-                        });
-                    }
-                });
+                if (200) await new Promise(r => setTimeout(r, 200));
+                var raw = editor.document.getText(editor.selection);
+                if (500) await new Promise(r => setTimeout(r, 500));
+                var regex = /(([\S]{1,}?)(\.[xyzw]{1,4}){0,1}) = (.{1,});\r\n([\s]{1,}\1 =)((.{0,})([ \(-])(\1)([ ,\);])(.{0,})){2,}/;
+                var result = regex.test(raw);
+                if (!result && raw == editor.document.getText(editor.selection)) {
+                    await vscode.commands.executeCommand('editor.action.replaceOne').then(async () => {
+                        if (500) await new Promise(r => setTimeout(r, 500));
+                    });
+                }
+                else{
+                    await vscode.commands.executeCommand('editor.action.nextMatchFindAction');
+                }
             }
         });
-        if (200) await new Promise(r => setTimeout(r, 200));
     },
     replaceOnlyOrSimilar: async function (info) {
         var dicOnlyOne = new Array(); //定义一个字典
@@ -238,11 +239,25 @@ const util = {
         }
 
     },
-    forTest: async function (info) {
+    forTest:  function (info) {
+        
+        var range = editor.selection;
+        var raw = editor.document.getText(range);
 
-        vscode.window.showTextDocument(editor.document.uri).then(() => {
-            this.ReplaceForMulit();
+        var addtextString = "return half4(half3(" + raw + "), 1.0);\n" ;
+
+        const line = editor.selection.active.line; // 当前选中行
+        const nextLine = line + 1; // 下一行
+        
+        const nextLineStartPosition = editor.document.lineAt(nextLine).range.start;
+
+        editor.edit((textEditorEdit) => {
+            textEditorEdit.insert(new vscode.Selection(nextLineStartPosition, nextLineStartPosition).anchor, addtextString);
         });
+
+        // vscode.window.showTextDocument(editor.document.uri).then(() => {
+        //     this.ReplaceForMulit();
+        // });
 
     },
     addDefine: function (info) {
