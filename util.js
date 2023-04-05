@@ -286,6 +286,16 @@ const util = {
 #define saturate(i) clamp(i, 0.0, 1.0)
 #define SAMPLE_TEXTURE2D(sss, sample_Texture, uv) texture(sss,uv)
 #define SAMPLE_TEXTURE2D_LOD(sss, sample_Texture, uv, lodLevel) textureLod(sss,uv,lodLevel)
+uniform int _RDCReturnIndex;  
+void OutPutColorFinal(vec4 outPut){
+    if(outputCount == _RDCReturnIndex){
+	    SV_Target0.xyzw = outPut;
+        return;
+    }
+}
+void OutPutColor(float outputValue){OutPutColorFinal(vec4(outputValue.xxx,1.0));}
+void OutPutColor(vec2 outputValue){OutPutColorFinal(vec4(outputValue.xy, 0.0,1.0));}
+void OutPutColor(vec3 outputValue){OutPutColorFinal(vec4(outputValue.xyz, 1.0));}
 `
         editor.edit((textEditorEdit) => {
             textEditorEdit.insert(editor.selection.anchor, addtextString + addVaryingString + '\n' + addVaryingString2);
